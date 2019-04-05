@@ -40,238 +40,238 @@ import com.kwbt.nk.analyzer.util.MyFileUtil;
 @EnableBatchProcessing
 public class BatchExecutor {
 
-	private final static Logger logger = LoggerFactory.getLogger(BatchExecutor.class);
+    private final static Logger logger = LoggerFactory.getLogger(BatchExecutor.class);
 
-	/************************************************
-	 * ymlファイルのProperty値
-	 */
-	@Value("${spring.datasource.driver-class-name}")
-	private String driverName;
+    /************************************************
+     * ymlファイルのProperty値
+     */
+    @Value("${spring.datasource.driver-class-name}")
+    private String driverName;
 
-	@Value("${spring.datasource.url}")
-	private String url;
+    @Value("${spring.datasource.url}")
+    private String url;
 
-	@Value("${nk.gridsize:3}")
-	private Integer gridSize;
+    @Value("${nk.gridsize:3}")
+    private Integer gridSize;
 
-	@Value("${nk.analyze:''}")
-	private String analyzeDate;
+    @Value("${nk.analyze:''}")
+    private String analyzeDate;
 
-	private final static int dateLength = 14;
+    private final static int dateLength = 14;
 
-	@Value("${nk.task.createMatcher:false}")
-	private Boolean execTaskCreateMatcher;
+    @Value("${nk.task.createMatcher:false}")
+    private Boolean execTaskCreateMatcher;
 
-	@Value("${nk.task.calculation:false}")
-	private Boolean execTaskCalculation;
+    @Value("${nk.task.calculation:false}")
+    private Boolean execTaskCalculation;
 
-	@Value("${nk.task.readAndCalc:false}")
-	private Boolean execTaskReadAndCalc;
+    @Value("${nk.task.readAndCalc:false}")
+    private Boolean execTaskReadAndCalc;
 
-	/**
-	 * Property値をバッチ起動時にログ出力
-	 */
-	public void callProperties() {
-		logger.info(String.format("property get: driverName           : %s", driverName));
-		logger.info(String.format("property get: url                  : %s", url));
-		logger.info(String.format("property get: gridSize             : %s", gridSize));
-		logger.info(String.format("property get: analyzeDate          : %s", analyzeDate));
-		logger.info(String.format("property get: execTaskCreateMatcher: %s", execTaskCreateMatcher));
-		logger.info(String.format("property get: execTaskCalculation  : %s", execTaskCalculation));
-		logger.info(String.format("property get: execTaskReadAndCalc  : %s", execTaskReadAndCalc));
-	}
+    /**
+     * Property値をバッチ起動時にログ出力
+     */
+    public void callProperties() {
+        logger.info(String.format("property get: driverName           : %s", driverName));
+        logger.info(String.format("property get: url                  : %s", url));
+        logger.info(String.format("property get: gridSize             : %s", gridSize));
+        logger.info(String.format("property get: analyzeDate          : %s", analyzeDate));
+        logger.info(String.format("property get: execTaskCreateMatcher: %s", execTaskCreateMatcher));
+        logger.info(String.format("property get: execTaskCalculation  : %s", execTaskCalculation));
+        logger.info(String.format("property get: execTaskReadAndCalc  : %s", execTaskReadAndCalc));
+    }
 
-	/************************************************
-	 * DIインスタンス
-	 */
-	@Autowired
-	private JobBuilderFactory jobBuilderFactory;
+    /************************************************
+     * DIインスタンス
+     */
+    @Autowired
+    private JobBuilderFactory jobBuilderFactory;
 
-	@Autowired
-	private StepBuilderFactory stepBuilderFactory;
+    @Autowired
+    private StepBuilderFactory stepBuilderFactory;
 
-	@Autowired
-	private CreateMatcher createMatcher;
+    @Autowired
+    private CreateMatcher createMatcher;
 
-	@Autowired
-	private MultiSelectSlave multiSelectSlave;
+    @Autowired
+    private MultiSelectSlave multiSelectSlave;
 
-	@Autowired
-	private MultiSelectPartitioner myPartitioner;
+    @Autowired
+    private MultiSelectPartitioner myPartitioner;
 
-	@Autowired
-	private ReadAndCalc readAndCalc;
+    @Autowired
+    private ReadAndCalc readAndCalc;
 
-	@Bean
-	public Job initialAndTaskletDefine() {
+    @Bean
+    public Job initialAndTaskletDefine() {
 
-		this.callProperties();
-		myPartitioner.callProperties();
-		createMatcher.callProperties();
-		multiSelectSlave.callProperties();
-		readAndCalc.callProperties();
+        this.callProperties();
+        myPartitioner.callProperties();
+        createMatcher.callProperties();
+        multiSelectSlave.callProperties();
+        readAndCalc.callProperties();
 
-		logger.info("start analyze new data");
+        logger.info("start analyze new data");
 
-		if (StringUtils.isNotBlank(analyzeDate)) {
+        if (StringUtils.isNotBlank(analyzeDate)) {
 
-			logger.info("start analyze InComplite data at {}", analyzeDate);
+            logger.info("start analyze InComplite data at {}", analyzeDate);
 
-			// 指定の日付に対する処理を再開
-			// SQL発行後、ファイルを結合する際の計算でエラーがあったため、その対応
-			if (analyzeDate.length() != dateLength) {
-				throw new RuntimeException("日付処理に必要な値の桁数が" + dateLength + "ではありません");
-			}
+            // 指定の日付に対する処理を再開
+            // SQL発行後、ファイルを結合する際の計算でエラーがあったため、その対応
+            if (analyzeDate.length() != dateLength) {
+                throw new RuntimeException("日付処理に必要な値の桁数が" + dateLength + "ではありません");
+            }
 
-			// 作業ディレクトリを、ymlファイルの指定値に設定する。
-			LocalDateTime requiredWorkDirTime = LocalDateTime.parse(
-					analyzeDate,
-					DateTimeFormatter.ofPattern(
-							MyFileUtil.localDateFormatterYMD + MyFileUtil.localDateFormatterHMS));
+            // 作業ディレクトリを、ymlファイルの指定値に設定する。
+            LocalDateTime requiredWorkDirTime = LocalDateTime.parse(
+                    analyzeDate,
+                    DateTimeFormatter.ofPattern(
+                            MyFileUtil.localDateFormatterYMD + MyFileUtil.localDateFormatterHMS));
 
-			// 作業ディレクトリ
-			File targetDir = new File(
-					MyFileUtil.getResutlWorkDirPath(requiredWorkDirTime));
+            // 作業ディレクトリ
+            File targetDir = new File(
+                    MyFileUtil.getResutlWorkDirPath(requiredWorkDirTime));
 
-			if (!targetDir.exists()) {
-				throw new RuntimeException("対象の作業フォルダが存在しません。 ：" + targetDir.getAbsolutePath());
-			}
+            if (!targetDir.exists()) {
+                throw new RuntimeException("対象の作業フォルダが存在しません。 ：" + targetDir.getAbsolutePath());
+            }
 
-			// 作業ディレクトリをMyFileUtilsへ設定
-			MyFileUtil.workDir = new File(
-					MyFileUtil.getResutlWorkDirPath(requiredWorkDirTime))
-							.getAbsolutePath();
+            // 作業ディレクトリをMyFileUtilsへ設定
+            MyFileUtil.workDir = new File(
+                    MyFileUtil.getResutlWorkDirPath(requiredWorkDirTime))
+                            .getAbsolutePath();
 
-			return defineJob();
+            return defineJob();
 
-		} else {
+        } else {
 
-			// 作業用ディレクトリを作成
-			MyFileUtil.makeDir();
+            // 作業用ディレクトリを作成
+            MyFileUtil.makeDir();
 
-			// 新規解析開始
-			return defineJob();
-		}
-	}
+            // 新規解析開始
+            return defineJob();
+        }
+    }
 
-	/**
-	 * 実行するジョブ、順番を定義<br>
-	 * ymlファイル側で、どのタスクを実行するかを定義。
-	 *
-	 * @return
-	 */
-	private Job defineJob() {
+    /**
+     * 実行するジョブ、順番を定義<br>
+     * ymlファイル側で、どのタスクを実行するかを定義。
+     *
+     * @return
+     */
+    private Job defineJob() {
 
-		JobBuilder jb = jobBuilderFactory.get("job")
-				.incrementer(new RunIdIncrementer())
-				.listener(listener());
+        JobBuilder jb = jobBuilderFactory.get("job")
+                .incrementer(new RunIdIncrementer())
+                .listener(listener());
 
-		boolean firstJob = true;
+        boolean firstJob = true;
 
-		SimpleJobBuilder jbb = null;
+        SimpleJobBuilder jbb = null;
 
-		if (execTaskCreateMatcher) {
-			jbb = jb.start(createMatcherStep());
-			firstJob = false;
-		}
+        if (execTaskCreateMatcher) {
+            jbb = jb.start(createMatcherStep());
+            firstJob = false;
+        }
 
-		if (execTaskCalculation) {
+        if (execTaskCalculation) {
 
-			if (firstJob) {
-				jbb = jb.start(calcurationStep());
-				firstJob = false;
-			} else {
-				jbb.next(calcurationStep());
-			}
-		}
+            if (firstJob) {
+                jbb = jb.start(calcurationStep());
+                firstJob = false;
+            } else {
+                jbb.next(calcurationStep());
+            }
+        }
 
-		if (execTaskReadAndCalc) {
+        if (execTaskReadAndCalc) {
 
-			if (firstJob) {
-				jbb = jb.start(readAndCalcStep());
-				firstJob = false;
-			} else {
-				jbb.next(readAndCalcStep());
-			}
-		}
+            if (firstJob) {
+                jbb = jb.start(readAndCalcStep());
+                firstJob = false;
+            } else {
+                jbb.next(readAndCalcStep());
+            }
+        }
 
-		return jbb.build();
-	}
+        return jbb.build();
+    }
 
-	@Bean
-	public JobExecutionListener listener() {
-		return new JobListener();
-	}
+    @Bean
+    public JobExecutionListener listener() {
+        return new JobListener();
+    }
 
-	@Bean
-	public SimpleAsyncTaskExecutor taskExecutor() {
-		return new SimpleAsyncTaskExecutor();
-	}
+    @Bean
+    public SimpleAsyncTaskExecutor taskExecutor() {
+        return new SimpleAsyncTaskExecutor();
+    }
 
-	/**
-	 * Step1:CreateMatcherステップを実行
-	 *
-	 * @return
-	 */
-	@Bean
-	public Step createMatcherStep() {
-		return stepBuilderFactory.get("createMatcher")
-				.tasklet(createMatcher)
-				.build();
-	}
+    /**
+     * Step1:CreateMatcherステップを実行
+     *
+     * @return
+     */
+    @Bean
+    public Step createMatcherStep() {
+        return stepBuilderFactory.get("createMatcher")
+                .tasklet(createMatcher)
+                .build();
+    }
 
-	/**
-	 * Step2:Masterステップ<br>
-	 * MultiSelectSlaveスレーブを多重起動
-	 *
-	 * @return
-	 */
-	@Bean
-	public Step calcurationStep() {
-		return stepBuilderFactory.get("master")
-				.partitioner(slaveStep().getName(), myPartitioner)
-				.partitionHandler(partitionHandler())
-				.build();
-	}
+    /**
+     * Step2:Masterステップ<br>
+     * MultiSelectSlaveスレーブを多重起動
+     *
+     * @return
+     */
+    @Bean
+    public Step calcurationStep() {
+        return stepBuilderFactory.get("master")
+                .partitioner(slaveStep().getName(), myPartitioner)
+                .partitionHandler(partitionHandler())
+                .build();
+    }
 
-	/**
-	 * MultiSelectSlaveスレーブ
-	 *
-	 * @return
-	 */
-	@Bean
-	public Step slaveStep() {
-		return stepBuilderFactory.get("multiSelectSlave")
-				.tasklet(multiSelectSlave)
-				.build();
-	}
+    /**
+     * MultiSelectSlaveスレーブ
+     *
+     * @return
+     */
+    @Bean
+    public Step slaveStep() {
+        return stepBuilderFactory.get("multiSelectSlave")
+                .tasklet(multiSelectSlave)
+                .build();
+    }
 
-	@Bean
-	public PartitionHandler partitionHandler() {
+    @Bean
+    public PartitionHandler partitionHandler() {
 
-		// 多重実行時の多重度、ステップの設定などを行う。
-		TaskExecutorPartitionHandler handler = new TaskExecutorPartitionHandler();
-		handler.setGridSize(gridSize);
-		handler.setTaskExecutor(taskExecutor());
-		handler.setStep(slaveStep());
+        // 多重実行時の多重度、ステップの設定などを行う。
+        TaskExecutorPartitionHandler handler = new TaskExecutorPartitionHandler();
+        handler.setGridSize(gridSize);
+        handler.setTaskExecutor(taskExecutor());
+        handler.setStep(slaveStep());
 
-		logger.info("set multi-thread num: {}", gridSize);
+        logger.info("set multi-thread num: {}", gridSize);
 
-		try {
-			handler.afterPropertiesSet();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return handler;
-	}
+        try {
+            handler.afterPropertiesSet();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return handler;
+    }
 
-	/**
-	 * 多重処理による複数ファイルを1つに纏め、諸計算を実行
-	 */
-	@Bean
-	public Step readAndCalcStep() {
-		return stepBuilderFactory.get("readAndCalc")
-				.tasklet(readAndCalc)
-				.build();
-	}
+    /**
+     * 多重処理による複数ファイルを1つに纏め、諸計算を実行
+     */
+    @Bean
+    public Step readAndCalcStep() {
+        return stepBuilderFactory.get("readAndCalc")
+                .tasklet(readAndCalc)
+                .build();
+    }
 }
