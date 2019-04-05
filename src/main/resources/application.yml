@@ -1,0 +1,18 @@
+spring:
+  datasource:
+    url: jdbc:sqlite:Q:\masataka\syuto\DB\1.4\race.db
+    driver-class-name: org.sqlite.JDBC
+    sql-script-encoding: UTF-8
+logging:
+  file: log\log.log
+  level: 
+    root: info
+nk:
+  analyze: '20181229000136'
+  task:
+    createMatcher: false
+    calculation: false
+    readAndCalc: true
+  calculation-debug-mode: false
+  caluculation-logging-span: 10
+  gridSize: 3
