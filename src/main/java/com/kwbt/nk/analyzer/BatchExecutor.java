@@ -25,10 +25,10 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
 
 import com.kwbt.nk.analyzer.parts.JobListener;
-import com.kwbt.nk.analyzer.step.CreateMatcher;
-import com.kwbt.nk.analyzer.step.MultiSelectPartitioner;
-import com.kwbt.nk.analyzer.step.MultiSelectSlave;
-import com.kwbt.nk.analyzer.step.ReadAndCalc;
+import com.kwbt.nk.analyzer.step.A01_CreateMatcher;
+import com.kwbt.nk.analyzer.step.A02_MultiSelectPartitioner;
+import com.kwbt.nk.analyzer.step.A02_MultiSelectSlave;
+import com.kwbt.nk.analyzer.step.A03_ReadAndCalc;
 import com.kwbt.nk.analyzer.util.MyFileUtil;
 
 /**
@@ -42,7 +42,7 @@ public class BatchExecutor {
 
     private final static Logger logger = LoggerFactory.getLogger(BatchExecutor.class);
 
-    /************************************************
+    /**
      * ymlファイルのProperty値
      */
     @Value("${spring.datasource.driver-class-name}")
@@ -57,8 +57,6 @@ public class BatchExecutor {
     @Value("${nk.analyze:''}")
     private String analyzeDate;
 
-    private final static int dateLength = 14;
-
     @Value("${nk.task.createMatcher:false}")
     private Boolean execTaskCreateMatcher;
 
@@ -67,6 +65,8 @@ public class BatchExecutor {
 
     @Value("${nk.task.readAndCalc:false}")
     private Boolean execTaskReadAndCalc;
+
+    private final static int dateLength = 14;
 
     /**
      * Property値をバッチ起動時にログ出力
@@ -81,7 +81,7 @@ public class BatchExecutor {
         logger.info(String.format("property get: execTaskReadAndCalc  : %s", execTaskReadAndCalc));
     }
 
-    /************************************************
+    /**
      * DIインスタンス
      */
     @Autowired
@@ -91,16 +91,16 @@ public class BatchExecutor {
     private StepBuilderFactory stepBuilderFactory;
 
     @Autowired
-    private CreateMatcher createMatcher;
+    private A01_CreateMatcher createMatcher;
 
     @Autowired
-    private MultiSelectSlave multiSelectSlave;
+    private A02_MultiSelectSlave multiSelectSlave;
 
     @Autowired
-    private MultiSelectPartitioner myPartitioner;
+    private A02_MultiSelectPartitioner myPartitioner;
 
     @Autowired
-    private ReadAndCalc readAndCalc;
+    private A03_ReadAndCalc readAndCalc;
 
     @Bean
     public Job initialAndTaskletDefine() {

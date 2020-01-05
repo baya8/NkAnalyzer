@@ -1,6 +1,6 @@
 spring:
   datasource:
-    url: jdbc:sqlite:Q:\masataka\syuto\DB\1.4\race.db
+    url: jdbc:sqlite:C:\Users\gskwb\Downloads\race.db
     driver-class-name: org.sqlite.JDBC
     sql-script-encoding: UTF-8
 logging:
