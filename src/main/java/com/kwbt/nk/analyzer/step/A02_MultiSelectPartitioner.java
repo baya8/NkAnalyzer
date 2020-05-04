@@ -16,8 +16,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.kwbt.nk.analyzer.step.model.Parser;
 import com.kwbt.nk.analyzer.util.MyFileUtil;
+import com.kwbt.nk.common.Parser;
 
 /**
  * マルチスレッドで稼働させるタスクレットの処理元データ分割を行う。

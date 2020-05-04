@@ -1,7 +1,4 @@
-package com.kwbt.nk.analyzer.step.model;
-
-import com.kwbt.nk.common.FeatureMatcher;
-import com.kwbt.nk.common.Result;
+package com.kwbt.nk.common;
 
 public class JsonData {
 

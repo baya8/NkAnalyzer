@@ -16,8 +16,8 @@ import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kwbt.nk.analyzer.repo.SQLiteRepo;
-import com.kwbt.nk.analyzer.step.model.Parser;
 import com.kwbt.nk.analyzer.util.MyFileUtil;
+import com.kwbt.nk.common.Parser;
 import com.kwbt.nk.db.entity.FeaturePayoff;
 
 /**

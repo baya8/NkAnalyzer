@@ -1,4 +1,4 @@
-package com.kwbt.nk.analyzer.step.model;
+package com.kwbt.nk.common;
 
 import java.io.Serializable;
 import java.util.List;
@@ -8,7 +8,6 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
-import com.kwbt.nk.common.FeatureMatcher;
 import com.kwbt.nk.db.entity.FeaturePayoff;
 
 /**
