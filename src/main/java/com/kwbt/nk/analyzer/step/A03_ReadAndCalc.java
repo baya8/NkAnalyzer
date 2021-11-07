@@ -17,7 +17,6 @@ import org.springframework.batch.core.StepContribution;
 import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.batch.core.step.tasklet.Tasklet;
 import org.springframework.batch.repeat.RepeatStatus;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -177,8 +176,7 @@ public class A03_ReadAndCalc implements Tasklet {
                     // logger.info("sql : {}", sql);
                     int payoffSum = sqliteRepo.selectInt(sql);
 
-                    Result e = new Result();
-                    BeanUtils.copyProperties(matcher, e);
+                    Result e = new Result(matcher);
                     e.bakenAllNum = bakenkonyu;
                     e.bakenNumOfFinishedOne = uniqueRaceId.size();
                     e.payoffSum = payoffSum;
@@ -187,7 +185,7 @@ public class A03_ReadAndCalc implements Tasklet {
 
                     JsonData oneLine = new JsonData();
                     oneLine.setResultModel(e);
-                    oneLine.setFeatureMatcher(p.featureMatcher);
+                    oneLine.setFeatureMatcher(matcher);
                     result.add(oneLine);
 
                 } else {

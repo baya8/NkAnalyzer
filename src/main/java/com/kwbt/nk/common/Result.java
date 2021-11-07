@@ -28,6 +28,21 @@ public class Result implements Serializable {
     public double kaisyu = -1.;
     public double syoritsu = -1.;
 
+    public Result(FeatureMatcher f) {
+        this.count = f.count;
+        this.age = f.age;
+        this.course = f.course;
+        this.dhweight = f.dhweight;
+        this.distance = f.distance;
+        this.dsl = f.dsl;
+        this.hweight = f.hweight;
+        this.odds = f.odds;
+        this.sex = f.sex;
+        this.surface = f.surface;
+        this.weather = f.weather;
+
+    }
+
     public int getCount() {
         return count;
     }

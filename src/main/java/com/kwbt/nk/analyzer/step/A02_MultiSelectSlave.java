@@ -60,13 +60,15 @@ public class A02_MultiSelectSlave implements Tasklet {
     @Override
     public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
 
-        ExecutionContext context = chunkContext.getStepContext().getStepExecution().getExecutionContext();
+        ExecutionContext context = chunkContext
+                .getStepContext()
+                .getStepExecution()
+                .getExecutionContext();
 
         @SuppressWarnings("unchecked")
         List<Parser> list = (List<Parser>) context.get(A02_MultiSelectPartitioner.SPLITED_LIST_KEY);
 
         run(list);
-        // run2(list);
 
         return RepeatStatus.FINISHED;
     }
